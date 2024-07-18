@@ -6,7 +6,8 @@ using SearchService;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpClient<AuctionSvcHttpClient>();
+
 
 var app = builder.Build();
 
@@ -21,7 +22,6 @@ try
 catch (Exception e)
 {
     Console.WriteLine(e);    
-    throw;
 }
 
 
