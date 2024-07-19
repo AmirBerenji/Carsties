@@ -42,6 +42,7 @@ public class AuctionController : ControllerBase
 
         return _mapper.Map<AuctionDto>(auction);
     }
+   
     [HttpPost]
     public async Task<ActionResult<AuctionDto>> CreateAyction(CreateAuctionDto auctionDto)
     {
