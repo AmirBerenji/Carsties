@@ -1,7 +1,6 @@
 
 using System.Net;
-using MongoDB.Driver;
-using MongoDB.Entities;
+using MassTransit;
 using Polly;
 using Polly.Extensions.Http;
 using SearchService;
@@ -9,7 +8,20 @@ using SearchService;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddHttpClient<AuctionSvcHttpClient>().AddPolicyHandler(GetPolicy());
+builder.Services.AddMassTransit(x => 
+{
+
+    x.AddConsumersFromNamespaceContaining<AuctionCreatedConsumer>();
+    
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("search",false));
+    
+    x.UsingRabbitMq((context, cfg) => 
+    {
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 
 var app = builder.Build();
@@ -17,7 +29,6 @@ var app = builder.Build();
 app.UseAuthentication();
 
 app.MapControllers();
-
 
 app.Lifetime.ApplicationStarted.Register(async () => 
 {
@@ -33,7 +44,6 @@ app.Lifetime.ApplicationStarted.Register(async () =>
 
 
 app.Run();
-
 
 static IAsyncPolicy<HttpResponseMessage> GetPolicy()
     => HttpPolicyExtensions
